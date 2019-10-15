@@ -19,6 +19,8 @@ import {
   Tooltip,
 } from 'antd';
 
+import Clipboard from '../../components/Clipboard';
+
 import links from './data/usefulLinks';
 import locales from './data/locales';
 import { numberingSystem, calendar, hourCycle } from './data/locales';
@@ -197,6 +199,47 @@ const Home = () => {
 
   const timeZones = moment.tz.names();
 
+  const getFormDataAsText = () => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDay();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    let locale;
+
+    if (navigator.languages && navigator.languages.length) {
+      locale = navigator.languages[0];
+    } else {
+      locale =
+        navigator.userLanguage ||
+        navigator.language ||
+        navigator.browserLanguage ||
+        'en';
+    }
+
+    const options = state.options;
+
+    const optionsString = Object.entries(options)
+      .reduce((memo, [key, value]) => {
+        if (typeof value !== 'undefined') {
+          const val = typeof value === 'string' ? `'${value}'` : value;
+
+          memo.push(`  ${key}: ${val}`);
+        }
+
+        return memo;
+      }, [])
+      .join(',\n');
+
+    const dateLine = `var date = new Date(Date.UTC(${year}, ${month}, ${day}, ${hours}, ${minutes}, ${seconds}));\n`;
+    const IntlHeader = `const formattedDate = new Intl.DateTimeFormat('${locale}', {\n`;
+    const IntlFooter = `\n}).format(date);`;
+
+    return `${dateLine}${IntlHeader}${optionsString}${IntlFooter}`;
+  };
+
   return (
     <div>
       <PageHeader
@@ -216,8 +259,10 @@ const Home = () => {
               <Tooltip title="open in codesandbox (future feature)">
                 <Icon type="link" key="reset" />
               </Tooltip>,
-              <Tooltip title="copy code to clipboard (future feature)">
-                <Icon type="copy" key="copy" />
+              <Tooltip title="copy code to clipboard">
+                <Clipboard onCopy={getFormDataAsText}>
+                  <Icon type="copy" key="copy" />
+                </Clipboard>
               </Tooltip>,
               <Tooltip title="reset (future feature)">
                 <Icon type="rest" key="reset" />
