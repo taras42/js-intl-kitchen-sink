@@ -207,16 +207,18 @@ const Home = () => {
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
 
-    let locale;
+    let locale = state.locale;
 
-    if (navigator.languages && navigator.languages.length) {
-      locale = navigator.languages[0];
-    } else {
-      locale =
-        navigator.userLanguage ||
-        navigator.language ||
-        navigator.browserLanguage ||
-        'en';
+    if (!locale) {
+      if (navigator.languages && navigator.languages.length) {
+        locale = navigator.languages[0];
+      } else {
+        locale =
+          navigator.userLanguage ||
+          navigator.language ||
+          navigator.browserLanguage ||
+          'en';
+      }
     }
 
     const options = state.options;
